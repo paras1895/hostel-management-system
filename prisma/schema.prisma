@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  id       Int       @id @default(autoincrement())
+  name     String
+  rooms    Room[]
+  warden   Warden[]
+}
+
+model Room {
+  id          Int          @id @default(autoincrement())
+  roomNumber  String
+  capacity    Int          @default(4)
+  blockId     Int
+  block       Block        @relation(fields: [blockId], references: [id])
+  students    Student[]
+  maintenance Maintenance[]
+}
+
+model Student {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  cgpa        Float
+  preference  String?
+  roomId      Int?
+  room        Room?     @relation(fields: [roomId], references: [id])
+  complaints  Complaint[]
+  payments    Payment[]
+  messId      Int?
+  mess        Mess?     @relation(fields: [messId], references: [id])
+  user        User?     @relation("StudentUser")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Complaint {
+  id         Int       @id @default(autoincrement())
+  studentId  Int
+  student    Student   @relation(fields: [studentId], references: [id])
+  message    String
+  status     String    @default("Pending")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Warden {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String?
+  blockId   Int?
+  block     Block?    @relation(fields: [blockId], references: [id])
+  user      User?     @relation("WardenUser")
+}
+
+model Payment {
+  id         Int       @id @default(autoincrement())
+  studentId  Int
+  student    Student   @relation(fields: [studentId], references: [id])
+  amount     Float
+  status     String    @default("Pending")
+  dueDate    DateTime
+  paidAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Mess {
+  id        Int       @id @default(autoincrement())
+  name      String
+  capacity  Int
+  menu      String?
+  students  Student[]
+}
+
+model Maintenance {
+  id          Int       @id @default(autoincrement())
+  roomId      Int
+  room        Room      @relation(fields: [roomId], references: [id])
+  description String
+  status      String    @default("Pending")
+  reportedAt  DateTime  @default(now())
+  resolvedAt  DateTime?
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      String    @default("student")
+  studentId Int?      @unique
+  student   Student?  @relation("StudentUser", fields: [studentId], references: [id])
+  wardenId  Int?      @unique
+  warden    Warden?   @relation("WardenUser", fields: [wardenId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
