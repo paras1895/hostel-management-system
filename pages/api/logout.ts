@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     serialize('token', '', {
       path: '/',
       httpOnly: true,
-      maxAge: 0, // expire immediately
+      maxAge: 0,
     })
   );
   res.status(200).json({ message: 'Logged out' });

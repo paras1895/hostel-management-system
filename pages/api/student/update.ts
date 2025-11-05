@@ -11,24 +11,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: "Unauthorized student" });
   }
 
-  const { name, email, gender, cgpa, preference } = req.body;
+  const { name, email, gender, cgpa, preference } = req.body ?? {};
 
   try {
-    // Update Student AND User email for consistency
-    await prisma.$transaction([
-      prisma.student.update({
-        where: { id: user.student.id },
-        data: { name, gender, cgpa, preference },
-      }),
-      prisma.user.update({
-        where: { id: user.id },
-        data: { email },
-      }),
-    ]);
+    const result = await prisma.$transaction(async (tx) => {
 
-    return res.status(200).json({ ok: true });
+      await tx.$executeRaw`
+        UPDATE Student
+        SET
+          name = ${name},
+          gender = ${gender},
+          cgpa = ${cgpa},
+          preference = ${preference},
+          updatedAt = NOW()
+        WHERE id = ${user.student.id}
+      `;
+
+      await tx.$executeRaw`
+        UPDATE \`User\`
+        SET
+          email = ${email},
+          updatedAt = NOW()
+        WHERE id = ${user.id}
+      `;
+
+      return { ok: true as const };
+    });
+
+    return res.status(200).json(result);
   } catch (e: any) {
+    if (e?.code === "P2002" || (typeof e?.message === "string" && e.message.includes("Duplicate entry"))) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
     console.error(e);
-    return res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e?.message ?? "Failed" });
   }
 }
