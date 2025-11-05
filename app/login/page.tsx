@@ -1,13 +1,21 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import LoginForm from './LoginForm';
+// app/login/page.tsx
+"use client";
 
-export default async function LoginPage() {
-  const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('token');
-  const token = tokenCookie?.value;
+import { useSearchParams } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import AuthForm from "@/components/AuthForm";
+import AlertBanner from "@/components/AlertBanner";
 
-  if (token) redirect('/dashboard');
+export default function LoginPage() {
+  const sp = useSearchParams() ?? new URLSearchParams();
 
-  return <LoginForm />;
+  return (
+    <>
+      <Navbar />
+      <div className="flex flex-col justify-center items-center min-h-screen bg-base-200 space-y-4 p-4">
+        <AlertBanner message={sp.get("message") ?? ""} error={sp.get("error") ?? ""} />
+        <AuthForm type="login" />
+      </div>
+    </>
+  );
 }

@@ -1,13 +1,21 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import SignupForm from './SignupForm';
+// app/signup/page.tsx
+"use client";
 
-export default async function SignupPage() {
-  const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('token');
-  const token = tokenCookie?.value;
+import { useSearchParams } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import AuthForm from "@/components/AuthForm";
+import AlertBanner from "@/components/AlertBanner";
 
-  if (token) redirect('/dashboard');
+export default function SignupPage() {
+  const sp = useSearchParams() ?? new URLSearchParams();
 
-  return <SignupForm />;
+  return (
+    <>
+      <Navbar />
+      <main className="flex flex-col justify-center items-center min-h-[calc(100vh-4rem)] bg-base-200 space-y-4 p-4 pt-20">
+        <AlertBanner message={sp.get("message") ?? ""} error={sp.get("error") ?? ""} />
+        <AuthForm type="signup" />
+      </main>
+    </>
+  );
 }

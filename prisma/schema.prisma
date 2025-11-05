@@ -14,6 +14,12 @@ model Block {
   warden   Warden[]
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model Room {
   id          Int          @id @default(autoincrement())
   roomNumber  String
@@ -21,13 +27,25 @@ model Room {
   blockId     Int
   block       Block        @relation(fields: [blockId], references: [id])
   students    Student[]
-  maintenance Maintenance[]
+  invites     RoomInvite[]
+  groupGender Gender?
+  groupYear   YearEnum?
+}
+
+enum YearEnum {
+  FY
+  SY
+  TY
+  BE
 }
 
 model Student {
   id          Int       @id @default(autoincrement())
+  mis         Int       @unique
   name        String
   email       String    @unique
+  year        YearEnum
+  gender      Gender    @default(OTHER)
   cgpa        Float
   preference  String?
   roomId      Int?
@@ -39,6 +57,9 @@ model Student {
   user        User?     @relation("StudentUser")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  sentInvites     RoomInvite[] @relation("FromStudentInvites")
+  receivedInvites RoomInvite[] @relation("ToStudentInvites")
+  verified    Boolean   @default(false)
 }
 
 model Complaint {
@@ -81,16 +102,6 @@ model Mess {
   students  Student[]
 }
 
-model Maintenance {
-  id          Int       @id @default(autoincrement())
-  roomId      Int
-  room        Room      @relation(fields: [roomId], references: [id])
-  description String
-  status      String    @default("Pending")
-  reportedAt  DateTime  @default(now())
-  resolvedAt  DateTime?
-}
-
 model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique
@@ -102,4 +113,27 @@ model User {
   warden    Warden?   @relation("WardenUser", fields: [wardenId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model RoomInvite {
+  id            Int           @id @default(autoincrement())
+  fromStudentId Int
+  toStudentId   Int
+  roomId        Int           // inviter’s current (temporary) room
+  status        InviteStatus  @default(PENDING)
+  createdAt     DateTime      @default(now())
+  respondedAt   DateTime?
+
+  fromStudent   Student       @relation("FromStudentInvites", fields: [fromStudentId], references: [id])
+  toStudent     Student       @relation("ToStudentInvites", fields: [toStudentId], references: [id])
+  room          Room          @relation(fields: [roomId], references: [id])
+
+  @@unique([toStudentId, roomId, status], map: "one_pending_per_room_target")
 }
