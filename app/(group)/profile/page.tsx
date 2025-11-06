@@ -20,10 +20,7 @@ export default async function ProfilePage() {
       <RoomInfoCard room={student.room as any} />
 
       {/* New update form */}
-      <div className="card bg-base-200 shadow p-6">
-        <h2 className="text-xl font-bold mb-4">Update Profile</h2>
-        <StudentUpdateForm initialData={student} />
-      </div>
+      <StudentUpdateForm initialData={student} />
     </div>
   );
 }

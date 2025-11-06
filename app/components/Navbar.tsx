@@ -5,7 +5,7 @@ import SmallThemeToggle from "./SmallThemeToggle";
 
 export default function Navbar() {
   return (
-    <nav className="navbar fixed bg-base-100 shadow-md px-6 flex items-center">
+    <nav className="navbar z-10 fixed bg-base-100 shadow-md px-6 flex items-center">
       <div className="flex-1">
         <Link href="/" className="text-xl font-bold">
         <div className="flex items-center">

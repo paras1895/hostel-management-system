@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         SET
           name = ${name},
           gender = ${gender},
+          email = ${email},
           cgpa = ${cgpa},
           preference = ${preference},
           updatedAt = NOW()

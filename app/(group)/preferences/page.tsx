@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import ThemeWatcher from "../../components/ThemeWatcher";
 
 type DayKey = "Monday"|"Tuesday"|"Wednesday"|"Thursday"|"Friday"|"Saturday"|"Sunday"; // not used, just here if you reuse utils
 
@@ -47,11 +47,15 @@ export default function PreferencesPage() {
     });
   };
 
+  const { isDark } = ThemeWatcher();
+
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-4">
+    <div className={`${
+              isDark ? "bg-gray-800" : "bg-white"
+            } p-6 max-w-3xl mx-auto space-y-4"`}>
       <h1 className="text-2xl font-bold">Submit Room Preferences</h1>
 
-      <div className="alert">
+      <div className="alert my-6">
         <div>
           Only <b>one member</b> of your provisional (TEMP) group should submit the list.
           Use room codes like <code>A-105</code>, <code>B-203</code>, <code>C-312</code>.
@@ -101,8 +105,8 @@ export default function PreferencesPage() {
         </div>
       </div>
 
-      <div className="text-sm opacity-70">
-        After the warden runs the allocation, you’ll see your assigned room on the dashboard.
+      <div className="text-sm opacity-70 mt-3">
+        After the warden runs the allocation, you'll see your assigned room on the dashboard.
       </div>
     </div>
   );

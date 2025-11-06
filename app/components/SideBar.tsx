@@ -40,7 +40,7 @@ export default function Sidebar({ role }: { role: "student" | "warden" }) {
 
           {role === "warden" ? (
             <>
-              <li>
+              {/* <li>
                 <Link
                   href="/warden/complaints"
                   className={linkClass("/warden/complaints")}
@@ -55,7 +55,7 @@ export default function Sidebar({ role }: { role: "student" | "warden" }) {
                 >
                   Manage Rooms
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   href="/warden/students"

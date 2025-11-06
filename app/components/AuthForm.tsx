@@ -13,10 +13,10 @@ type GenderEnum = "MALE" | "FEMALE" | "OTHER";
 
 interface FormData {
   name: string;
-  mis: number | "";      // we'll convert on submit
+  mis: number | ""; // we'll convert on submit
   year: YearEnum | "";
   gender: GenderEnum | "";
-  cgpa: number | "";     // we'll convert on submit
+  cgpa: number | ""; // we'll convert on submit
   email: string;
   password: string;
 }
@@ -114,7 +114,9 @@ export default function AuthForm({ type }: AuthFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className={`${isDark ? "bg-gray-800" : "bg-white"} w-full max-w-sm shadow-lg p-6 space-y-4`}
+      className={`${
+        isDark ? "bg-gray-800" : "bg-white"
+      } w-full max-w-sm shadow-lg p-6 space-y-4`}
     >
       <h2 className="text-2xl font-bold text-center">
         {type === "login" ? "Login" : "Create Account"}
@@ -124,7 +126,9 @@ export default function AuthForm({ type }: AuthFormProps) {
         <>
           {/* Name */}
           <div className="form-control">
-            <label className="label"><span className="label-text">Full Name</span></label>
+            <label className="label">
+              <span className="label-text">Full Name</span>
+            </label>
             <input
               type="text"
               placeholder="Your name"
@@ -137,7 +141,9 @@ export default function AuthForm({ type }: AuthFormProps) {
 
           {/* MIS */}
           <div className="form-control">
-            <label className="label"><span className="label-text">MIS</span></label>
+            <label className="label">
+              <span className="label-text">MIS</span>
+            </label>
             <input
               type="number"
               placeholder="MIS"
@@ -145,7 +151,8 @@ export default function AuthForm({ type }: AuthFormProps) {
               onChange={(e) =>
                 setForm({
                   ...form,
-                  mis: e.target.value === "" ? "" : parseInt(e.target.value, 10),
+                  mis:
+                    e.target.value === "" ? "" : parseInt(e.target.value, 10),
                 })
               }
               className="input input-bordered no-spinner"
@@ -155,39 +162,57 @@ export default function AuthForm({ type }: AuthFormProps) {
 
           {/* Year (send enum values, show pretty labels) */}
           <div className="form-control">
-            <label className="label"><span className="label-text">Year</span></label>
+            <label className="label">
+              <span className="label-text">Year</span>
+            </label>
             <select
               value={form.year}
-              onChange={(e) => setForm({ ...form, year: e.target.value as YearEnum })}
+              onChange={(e) =>
+                setForm({ ...form, year: e.target.value as YearEnum })
+              }
               className="select select-bordered"
               required
             >
-              <option disabled value="">Select your year</option>
+              <option disabled value="">
+                Select your year
+              </option>
               {YEAR_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Gender */}
           <div className="form-control">
-            <label className="label"><span className="label-text">Gender</span></label>
+            <label className="label">
+              <span className="label-text">Gender</span>
+            </label>
             <select
               value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value as GenderEnum })}
+              onChange={(e) =>
+                setForm({ ...form, gender: e.target.value as GenderEnum })
+              }
               className="select select-bordered"
               required
             >
-              <option disabled value="">Select your gender</option>
+              <option disabled value="">
+                Select your gender
+              </option>
               {GENDER_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
           </div>
 
           {/* CGPA */}
           <div className="form-control">
-            <label className="label"><span className="label-text">CGPA</span></label>
+            <label className="label">
+              <span className="label-text">CGPA</span>
+            </label>
             <input
               type="number"
               step="0.01"
@@ -195,9 +220,13 @@ export default function AuthForm({ type }: AuthFormProps) {
               max="10"
               placeholder="Enter CGPA (0 - 10)"
               value={form.cgpa === "" ? "" : form.cgpa}
-              onChange={(e) =>
-                setForm({ ...form, cgpa: e.target.value === "" ? "" : Number(e.target.value) })
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow empty value or up to 2 decimal places
+                if (value === "" || /^\d{0,2}(\.\d{0,2})?$/.test(value)) {
+                  setForm({ ...form, cgpa: value === "" ? "" : Number(value) });
+                }
+              }}
               className="input input-bordered no-spinner"
               required
             />
@@ -207,7 +236,9 @@ export default function AuthForm({ type }: AuthFormProps) {
 
       {/* Email */}
       <div className="form-control">
-        <label className="label"><span className="label-text">Email</span></label>
+        <label className="label">
+          <span className="label-text">Email</span>
+        </label>
         <input
           type="email"
           placeholder="you@example.com"
@@ -220,7 +251,9 @@ export default function AuthForm({ type }: AuthFormProps) {
 
       {/* Password */}
       <div className="form-control">
-        <label className="label"><span className="label-text">Password</span></label>
+        <label className="label">
+          <span className="label-text">Password</span>
+        </label>
         <input
           type="password"
           placeholder="••••••••"
@@ -233,15 +266,29 @@ export default function AuthForm({ type }: AuthFormProps) {
 
       {error && <p className="text-error text-sm">{error}</p>}
 
-      <button type="submit" disabled={loading} className="btn btn-primary w-full mt-4">
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn btn-primary w-full mt-4"
+      >
         {loading ? "Please wait..." : type === "login" ? "Login" : "Sign Up"}
       </button>
 
       <p className="text-sm text-center mt-3">
         {type === "login" ? (
-          <>Don't have an account? <a href={"/signup"} className="link link-primary">Sign Up</a></>
+          <>
+            Don't have an account?{" "}
+            <a href={"/signup"} className="link link-primary">
+              Sign Up
+            </a>
+          </>
         ) : (
-          <>Already have an account? <a href={"/login"} className="link link-primary">Login</a></>
+          <>
+            Already have an account?{" "}
+            <a href={"/login"} className="link link-primary">
+              Login
+            </a>
+          </>
         )}
       </p>
     </form>
