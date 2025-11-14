@@ -6,15 +6,15 @@ type AcceptedMate = { id: number; name: string; mis: number | null };
 type PendingMate = { id: number; name: string; mis: number | null };
 
 type Props = {
-  meId?: number; // to optionally annotate "You"
+  meId?: number;
   room?: {
     roomNumber?: string | null;
     blockName?: string | null;
     capacity?: number | null;
-    count?: number | null; // accepted count
-    students?: AcceptedMate[] | null; // accepted members
+    count?: number | null;
+    students?: AcceptedMate[] | null;
   } | null;
-  pending?: PendingMate[]; // invited but not accepted yet
+  pending?: PendingMate[];
 };
 
 export default function RoomInfoCard({ meId, room, pending = [] }: Props) {
@@ -34,7 +34,6 @@ export default function RoomInfoCard({ meId, room, pending = [] }: Props) {
 
   return (
     <div className={`${isDark ? "bg-gray-800" : "bg-white"} text-base-content p-6 rounded-lg shadow-md relative`}>
-      {/* top-right counter */}
       <div className="badge badge-primary absolute top-3 right-3">
         {acceptedCount}/{capacity}
       </div>

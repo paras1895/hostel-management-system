@@ -1,6 +1,10 @@
 // app/(group)/roommates/page.tsx
 import { getCurrentUser } from "@/lib/getCurrentUser";
-import { getAvailableStudentsForInvite, getMyInvites, getMyRoomAndMembers } from "@/lib/roommates";
+import {
+  getAvailableStudentsForInvite,
+  getMyInvites,
+  getMyRoomAndMembers,
+} from "@/lib/roommates";
 import InviteCard from "./InviteCard";
 import CandidateCard from "./CandidateCard";
 import LeaveRoomButton from "./LeaveRoomButton";
@@ -31,7 +35,9 @@ export default async function RoommatesPage() {
                   <div className="card-body">
                     <div className="font-medium">{s.name}</div>
                     <div className="text-sm opacity-70">{s.email}</div>
-                    <div className="text-xs mt-2">Year: {s.year} • CGPA: {s.cgpa}</div>
+                    <div className="text-xs mt-2">
+                      Year: {s.year} • CGPA: {s.cgpa}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -45,7 +51,8 @@ export default async function RoommatesPage() {
           </>
         ) : (
           <div className="alert">
-            You aren't in a room yet. Once you accept an invite, you'll be placed into that group.
+            You aren't in a room yet. Once you accept an invite, you'll be
+            placed into that group.
           </div>
         )}
       </section>
@@ -57,12 +64,17 @@ export default async function RoommatesPage() {
         ) : (
           <div className="space-y-3">
             {invites.map((inv, idx) => (
-  <InviteCard
-    key={inv.id ?? inv.inviteId ?? `${inv.fromStudentId ?? "from"}-${inv.roomId ?? "room"}-${idx}`}
-    invite={inv}
-  />
-))}
-
+              <InviteCard
+                key={
+                  inv.id ??
+                  inv.inviteId ??
+                  `${inv.fromStudentId ?? "from"}-${
+                    inv.roomId ?? "room"
+                  }-${idx}`
+                }
+                invite={inv}
+              />
+            ))}
           </div>
         )}
       </section>

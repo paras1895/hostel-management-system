@@ -1,8 +1,6 @@
-// lib/currentUser.raw.ts
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-// Shapes are minimal; extend if you want stricter typing
 type UserRow = {
   id: number;
   email: string;
@@ -22,7 +20,6 @@ export async function getCurrentUser() {
   const userId = Number(token);
   if (!Number.isFinite(userId)) return null;
 
-  // 1) Base user
   const users = await prisma.$queryRaw<UserRow[]>`
     SELECT id, email, password, role, studentId, wardenId, createdAt, updatedAt
     FROM User
@@ -32,12 +29,9 @@ export async function getCurrentUser() {
   const user = users[0];
   if (!user) return null;
 
-  // Build the return object incrementally
   const result: any = { ...user, student: null, warden: null };
 
-  // If the user is linked to a student, fetch that graph
   if (user.studentId) {
-    // 2) Student
     const [student] = await prisma.$queryRaw<any[]>`
       SELECT id, mis, name, email, year, gender, cgpa, preference, roomId, messId, verified, createdAt, updatedAt
       FROM Student
@@ -46,11 +40,15 @@ export async function getCurrentUser() {
     `;
 
     if (student) {
-      const studentOut: any = { ...student, room: null, mess: null, payments: [], complaints: [] };
+      const studentOut: any = {
+        ...student,
+        room: null,
+        mess: null,
+        payments: [],
+        complaints: [],
+      };
 
-      // 3) Room + Block + Warden[]
       if (student.roomId) {
-        // Room
         const [room] = await prisma.$queryRaw<any[]>`
           SELECT id, roomNumber, capacity, blockId, groupGender, groupYear
           FROM Room
@@ -59,7 +57,6 @@ export async function getCurrentUser() {
         `;
 
         if (room) {
-          // Block
           const [block] = await prisma.$queryRaw<any[]>`
             SELECT id, name
             FROM Block
@@ -67,7 +64,6 @@ export async function getCurrentUser() {
             LIMIT 1
           `;
 
-          // Warden[] for the block
           const wardens = block
             ? await prisma.$queryRaw<any[]>`
                 SELECT id, name, email, phone, blockId
@@ -76,7 +72,6 @@ export async function getCurrentUser() {
               `
             : [];
 
-          // Students in the same room (limited fields)
           const roommates = await prisma.$queryRaw<any[]>`
             SELECT id, name, email, cgpa, year
             FROM Student
@@ -91,7 +86,6 @@ export async function getCurrentUser() {
         }
       }
 
-      // 4) Mess (if any)
       if (student.messId) {
         const [mess] = await prisma.$queryRaw<any[]>`
           SELECT id, name, capacity, menu
@@ -102,7 +96,6 @@ export async function getCurrentUser() {
         studentOut.mess = mess ?? null;
       }
 
-      // 5) Payments
       const payments = await prisma.$queryRaw<any[]>`
         SELECT id, studentId, amount, status, dueDate, paidAt, createdAt, updatedAt
         FROM Payment
@@ -111,7 +104,6 @@ export async function getCurrentUser() {
       `;
       studentOut.payments = payments;
 
-      // 6) Complaints
       const complaints = await prisma.$queryRaw<any[]>`
         SELECT id, studentId, message, status, createdAt, updatedAt
         FROM Complaint
@@ -124,9 +116,7 @@ export async function getCurrentUser() {
     }
   }
 
-  // If the user is linked to a warden, fetch that graph
   if (user.wardenId) {
-    // 7) Warden
     const [warden] = await prisma.$queryRaw<any[]>`
       SELECT id, name, email, phone, blockId
       FROM Warden
@@ -138,7 +128,6 @@ export async function getCurrentUser() {
       let blockOut: any = null;
 
       if (warden.blockId) {
-        // Block
         const [block] = await prisma.$queryRaw<any[]>`
           SELECT id, name
           FROM Block
@@ -147,7 +136,6 @@ export async function getCurrentUser() {
         `;
 
         if (block) {
-          // Rooms in that block
           const rooms = await prisma.$queryRaw<any[]>`
             SELECT id, roomNumber, capacity, blockId, groupGender, groupYear
             FROM Room

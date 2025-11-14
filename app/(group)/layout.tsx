@@ -14,22 +14,17 @@ export default async function GroupLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // 🔐 Authenticate user on the server
   const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login?error=Please log in to continue");
   }
 
-  // 👇 Extract role safely
   const role = user.role as "student" | "warden";
 
   return (
     <div className="flex h-screen bg-base-200 overflow-hidden">
-      {/* Sidebar stays persistent across all pages */}
       <Sidebar role={role} />
-
-      {/* Page-specific content (e.g., Dashboard, Profile, etc.) */}
       <main className="flex-1 overflow-y-auto p-8">{children}</main>
     </div>
   );

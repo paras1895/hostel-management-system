@@ -10,7 +10,6 @@ export default async function WardenStudentsPage() {
   if (!user) redirect("/login?error=Please log in first.");
   if (user.role !== "warden") redirect("/dashboard?error=Unauthorized access.");
 
-  // Fetch all students
   const students = await prisma.student.findMany({
     select: {
       id: true,

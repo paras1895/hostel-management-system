@@ -111,7 +111,6 @@ export default function ComplaintPage() {
 
   return (
     <div className="flex flex-col h-[90vh] bg-base-200 overflow-hidden">
-      {/* Header */}
       <header className="pb-4 shrink-0 flex items-center gap-3">
         {isDark ? (
           <img src="/complaint-light.svg" alt="icon" className="w-6 h-6" />
@@ -121,9 +120,7 @@ export default function ComplaintPage() {
         <h1 className="text-2xl font-bold">Complaints Chat</h1>
       </header>
 
-      {/* Chat container */}
       <main className="flex-1 flex flex-col h-10 overflow-hidden">
-        {/* Scrollable messages */}
         <div className={`${isDark ? "bg-gray-800" : "bg-white"} flex-1 bg-base-100 rounded-lg shadow-lg p-4 overflow-y-auto space-y-4`}>
           {complaints.length === 0 ? (
             <p className="text-center text-gray-500 mt-20">
@@ -160,7 +157,6 @@ export default function ComplaintPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input box (stays visible at bottom) */}
         <form
           onSubmit={handleSubmit}
           className="shrink-0 mt-4 rounded-lg shadow-lg flex gap-2"

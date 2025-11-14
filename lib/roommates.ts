@@ -2,7 +2,6 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getMyRoomAndMembers(studentId: number) {
-  // 1) Find my room (or null)
   const base = await prisma.$queryRaw<
     { roomId: number | null; roomNumber: string | null; capacity: number | null }[]
   >`
@@ -15,17 +14,14 @@ export async function getMyRoomAndMembers(studentId: number) {
 
   const row = base[0];
   if (!row || row.roomId == null) {
-    // keep shape identical to old code: me?.room === null
     return { room: null };
   }
 
-  // 2) Count current students in my room
   const cntRows = await prisma.$queryRaw<{ cnt: number }[]>`
     SELECT COUNT(*) AS cnt FROM Student WHERE roomId = ${row.roomId}
   `;
   const count = Number(cntRows[0]?.cnt ?? 0);
 
-  // 3) Load members (fields your UI reads)
   const students = await prisma.$queryRaw<
     { id: number; name: string; email: string; cgpa: number; year: string }[]
   >`
@@ -35,7 +31,6 @@ export async function getMyRoomAndMembers(studentId: number) {
     ORDER BY name
   `;
 
-  // 4) Return the nested shape your page expects
   return {
     room: {
       id: row.roomId,

@@ -1,4 +1,3 @@
-// pages/api/invites/[id].ts (raw SQL version)
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "../_utils";
@@ -21,7 +20,6 @@ export default async function handler(
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      // Load invite + room snapshot
       const invites = await tx.$queryRaw<any[]>`
         SELECT 
           ri.id AS id,
@@ -47,7 +45,6 @@ export default async function handler(
         throw new Error("Invalid invite");
       }
 
-      // DECLINE
       if (action === "DECLINE") {
         await tx.$executeRaw`
     DELETE FROM RoomInvite
@@ -57,9 +54,6 @@ export default async function handler(
         return { status: "DECLINED" as const };
       }
 
-      // ACCEPT flow
-
-      // Load me (lock check / existing room)
       const meRows = await tx.$queryRaw<any[]>`
         SELECT id, roomId, gender, year
         FROM Student
@@ -69,14 +63,12 @@ export default async function handler(
       const me = meRows[0];
       if (!me) throw new Error("Student not found");
 
-      // Already in a different room?
       if (me.roomId && me.roomId !== invite.roomId) {
         throw new Error(
           "You are already in another room. Leave it before accepting this invite."
         );
       }
 
-      // If room has missing locks, stamp them from me (legacy rooms)
       if (!invite.groupGender || !invite.groupYear) {
         await tx.$executeRaw`
           UPDATE Room
@@ -86,7 +78,6 @@ export default async function handler(
         `;
       }
 
-      // Re-read room locks + latest count
       const lockedRooms = await tx.$queryRaw<any[]>`
         SELECT 
           id,
@@ -103,7 +94,6 @@ export default async function handler(
         throw new Error("Room policy not configured. Try again.");
       }
 
-      // Enforce gender/year
       if (me.gender !== locked.groupGender) {
         throw new Error("This room is restricted to same-gender roommates.");
       }
@@ -111,26 +101,21 @@ export default async function handler(
         throw new Error("This room is restricted to same-year roommates.");
       }
 
-      // Capacity check
       if (locked.studentCount >= locked.capacity) {
         throw new Error("Room is full now. Try another room.");
       }
 
-      // Join the room
       await tx.$executeRaw`
         UPDATE Student SET roomId = ${invite.roomId}
         WHERE id = ${user.student.id}
       `;
 
-      // Accept this invite
       await tx.$executeRaw`
         UPDATE RoomInvite
         SET status = ${"ACCEPTED"}, respondedAt = NOW()
         WHERE id = ${inviteId}
       `;
 
-      // Expire other incoming invites to me (except this one)
-      // Expire (delete) other incoming pending invites to me (except this one)
       await tx.$executeRaw`
   DELETE FROM RoomInvite
   WHERE toStudentId = ${user.student.id}
@@ -138,7 +123,6 @@ export default async function handler(
     AND id <> ${inviteId}
 `;
 
-      // Expire (delete) my outgoing pending invites to other rooms
       await tx.$executeRaw`
   DELETE FROM RoomInvite
   WHERE fromStudentId = ${user.student.id}

@@ -13,10 +13,10 @@ type GenderEnum = "MALE" | "FEMALE" | "OTHER";
 
 interface FormData {
   name: string;
-  mis: number | ""; // we'll convert on submit
+  mis: number | "";
   year: YearEnum | "";
   gender: GenderEnum | "";
-  cgpa: number | ""; // we'll convert on submit
+  cgpa: number | "";
   email: string;
   password: string;
 }
@@ -56,7 +56,6 @@ export default function AuthForm({ type }: AuthFormProps) {
     setError("");
 
     try {
-      // basic client-side validation for signup
       if (type === "signup") {
         if (form.mis === "" || isNaN(Number(form.mis))) {
           setError("Please enter a valid MIS number");
@@ -124,7 +123,6 @@ export default function AuthForm({ type }: AuthFormProps) {
 
       {type === "signup" && (
         <>
-          {/* Name */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Full Name</span>
@@ -139,7 +137,6 @@ export default function AuthForm({ type }: AuthFormProps) {
             />
           </div>
 
-          {/* MIS */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">MIS</span>
@@ -160,7 +157,6 @@ export default function AuthForm({ type }: AuthFormProps) {
             />
           </div>
 
-          {/* Year (send enum values, show pretty labels) */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Year</span>
@@ -184,7 +180,6 @@ export default function AuthForm({ type }: AuthFormProps) {
             </select>
           </div>
 
-          {/* Gender */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Gender</span>
@@ -208,7 +203,6 @@ export default function AuthForm({ type }: AuthFormProps) {
             </select>
           </div>
 
-          {/* CGPA */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">CGPA</span>
@@ -222,7 +216,6 @@ export default function AuthForm({ type }: AuthFormProps) {
               value={form.cgpa === "" ? "" : form.cgpa}
               onChange={(e) => {
                 const value = e.target.value;
-                // Allow empty value or up to 2 decimal places
                 if (value === "" || /^\d{0,2}(\.\d{0,2})?$/.test(value)) {
                   setForm({ ...form, cgpa: value === "" ? "" : Number(value) });
                 }
@@ -234,7 +227,6 @@ export default function AuthForm({ type }: AuthFormProps) {
         </>
       )}
 
-      {/* Email */}
       <div className="form-control">
         <label className="label">
           <span className="label-text">Email</span>
@@ -249,7 +241,6 @@ export default function AuthForm({ type }: AuthFormProps) {
         />
       </div>
 
-      {/* Password */}
       <div className="form-control">
         <label className="label">
           <span className="label-text">Password</span>

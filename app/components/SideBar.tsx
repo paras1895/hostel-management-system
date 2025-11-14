@@ -24,7 +24,7 @@ export default function Sidebar({ role }: { role: "student" | "warden" }) {
     <aside className="w-64 bg-base-100 p-5 flex flex-col justify-between shadow-lg">
       <div>
         <h2 className="text-xl font-bold mb-6">
-          {role === "warden" ? "🏢 Warden" : "🎓 Student"}
+          {role === "warden" ? "Warden" : "Student"}
         </h2>
         <ul className="menu bg-base-100 rounded-box">
           <li>
@@ -40,7 +40,7 @@ export default function Sidebar({ role }: { role: "student" | "warden" }) {
 
           {role === "warden" ? (
             <>
-              {/* <li>
+              <li>
                 <Link
                   href="/warden/complaints"
                   className={linkClass("/warden/complaints")}
@@ -50,12 +50,12 @@ export default function Sidebar({ role }: { role: "student" | "warden" }) {
               </li>
               <li>
                 <Link
-                  href="/warden/rooms"
-                  className={linkClass("/warden/rooms")}
+                  href="/warden/allocation"
+                  className={linkClass("/warden/allocation")}
                 >
-                  Manage Rooms
+                  Room Allocation
                 </Link>
-              </li> */}
+              </li>
               <li>
                 <Link
                   href="/warden/students"

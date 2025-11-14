@@ -9,7 +9,6 @@ export default function ThemeToggle() {
 
   const [theme, setTheme] = useState<ThemeType>(lightTheme);
 
-  // read from DOM/localStorage once (mount)
   useEffect(() => {
     const root = document.documentElement;
     const attr = root.getAttribute("data-theme") as ThemeType | null;
@@ -40,13 +39,12 @@ export default function ThemeToggle() {
             : "bg-slate-200 hover:bg-slate-400/80"
         }`}
     >
-      {/* Knob */}
+
       <div
         className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 
           ${theme === darkTheme ? "translate-x-8" : "translate-x-0"}`}
       />
 
-      {/* 🌞 Sun Icon (light mode) */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -69,7 +67,6 @@ export default function ThemeToggle() {
         <path d="M19.7778 19.7773L17.5558 17.5551" />
       </svg>
 
-      {/* 🌙 Moon Icon (dark mode) */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

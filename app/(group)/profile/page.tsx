@@ -15,11 +15,8 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex-1 p-6 space-y-6">
-      {/* Existing cards */}
       <StudentInfoCard student={student} />
       <RoomInfoCard room={student.room as any} />
-
-      {/* New update form */}
       <StudentUpdateForm initialData={student} />
     </div>
   );

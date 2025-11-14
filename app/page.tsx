@@ -92,7 +92,6 @@ const HostelHomePage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section
         id="home"
         className="h-screen flex items-center justify-center text-center text-white relative"
@@ -102,10 +101,8 @@ const HostelHomePage: React.FC = () => {
           backgroundPosition: "center",
         }}
       >
-        {/* Glassy Blur Overlay */}
         <div className="absolute inset-0 bg-[#132440]/20 backdrop-blur-sm"></div>
 
-        {/* Content */}
         <div className="relative z-10 max-w-2xl px-8 rounded-lg shadow-lg p-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             COEP Hostel Management System
@@ -122,7 +119,6 @@ const HostelHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* About Section */}
       <section id="about" className="py-16 px-8 max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-lg p-8 gap-8">
           <img
@@ -144,7 +140,6 @@ const HostelHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Facilities Section */}
       <section
         id="facilities"
         className="py-16 px-8 max-w-6xl mx-auto text-center"
@@ -202,7 +197,6 @@ const HostelHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer id="contact" className="bg-blue-600 text-white py-8 px-8">
         <div className="flex flex-col md:flex-row justify-around items-center mb-8">
           <div className="mb-4 md:mb-0">

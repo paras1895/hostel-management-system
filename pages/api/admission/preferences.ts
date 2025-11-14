@@ -1,72 +1,181 @@
-// pages/api/admission/preferences.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "../_utils";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).end();
+function isRoomCode(s: string) {
+  return /^[A-Z]+-\d{3}$/.test(String(s).toUpperCase());
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const method = req.method ?? "GET";
+  if (method !== "GET" && method !== "POST")
+    return res.status(405).json({ error: "Method not allowed" });
 
   const user = await getUserFromRequest(req);
-  if (!user?.student?.id) return res.status(401).json({ error: "Unauthorized" });
+  if (!user?.student)
+    return res
+      .status(401)
+      .json({ error: "Only students can use this endpoint." });
 
-  const { preferences } = (req.body ?? {}) as { preferences?: string[] };
-  if (!Array.isArray(preferences) || preferences.length === 0) {
-    return res.status(400).json({ error: "preferences must be a non-empty string array" });
+  const studentId = Number(user.student.id ?? user.studentId);
+  if (!studentId) return res.status(400).json({ error: "Invalid student." });
+
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    include: { room: { include: { block: true } } },
+  });
+  if (!student) return res.status(404).json({ error: "Student not found." });
+
+  if (!student.roomId || student.room?.block?.name !== "Provisional") {
+    if (method === "GET") {
+      return res.status(200).json({ inProvisional: false });
+    }
+    return res
+      .status(400)
+      .json({
+        error: "You must be in a provisional room to submit preferences.",
+      });
+  }
+
+  const tempRoomId = student.roomId;
+
+  const occRow = await prisma.$queryRaw<{ cnt: number }[]>`
+    SELECT COUNT(*) as cnt FROM Student WHERE roomId = ${tempRoomId}
+  `;
+  const currentOccupancy = Number(occRow[0]?.cnt ?? 0);
+  const roomCapacity = student.room?.capacity ?? 4;
+
+  if (method === "GET") {
+    try {
+      const pref = await prisma.preference.findFirst({ where: { tempRoomId } });
+      if (!pref) {
+        return res.status(200).json({
+          inProvisional: true,
+          tempRoom: {
+            id: student.room?.id,
+            roomNumber: student.room?.roomNumber,
+            capacity: roomCapacity,
+            currentOccupancy,
+          },
+          exists: false,
+        });
+      }
+      return res.status(200).json({
+        inProvisional: true,
+        tempRoom: {
+          id: student.room?.id,
+          roomNumber: student.room?.roomNumber,
+          capacity: roomCapacity,
+          currentOccupancy,
+        },
+        exists: true,
+        preference: JSON.parse(pref.preferences),
+        submittedBy: pref.submittedBy,
+        submittedAt: pref.createdAt,
+        prefId: pref.id,
+      });
+    } catch (err) {
+      console.error("preferences GET error:", err);
+      return res.status(500).json({ error: "Server error" });
+    }
   }
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Load my provisional room
-      const meRows = await tx.$queryRaw<{ roomId: number | null }[]>`
-        SELECT roomId FROM Student WHERE id = ${user.student.id} LIMIT 1
-      `;
-      const myRoomId = meRows[0]?.roomId ?? null;
-      if (!myRoomId) throw new Error("You are not in a provisional room.");
+    const body = req.body ?? {};
+    if (!Array.isArray(body.preferences))
+      return res.status(400).json({ error: "preferences must be an array." });
+    const clean = body.preferences
+      .map((p: any) => String(p).trim().toUpperCase())
+      .filter(isRoomCode);
 
-      // Room number + block to verify TEMP/Provisional
-      const roomRows = await tx.$queryRaw<{ id: number; roomNumber: string; blockName: string }[]>`
-        SELECT r.id, r.roomNumber, b.name AS blockName
-        FROM Room r JOIN Block b ON b.id = r.blockId
-        WHERE r.id = ${myRoomId}
-        LIMIT 1
-      `;
-      const room = roomRows[0];
-      if (!room) throw new Error("Room not found.");
-      // Treat either Block='Provisional' OR roomNumber like 'TEMP-%' as provisional
-      if (room.blockName !== "Provisional" && !room.roomNumber.startsWith("TEMP-")) {
-        throw new Error("Preferences can be submitted only from a provisional room.");
-      }
+    if (clean.length === 0)
+      return res.status(400).json({ error: "No valid preferences provided." });
 
-      // Delete previous preferences for this provisional room
-      await tx.$executeRaw`
-        DELETE FROM RoomPreference WHERE provisionalRoomId = ${room.id}
-      `;
+    if (currentOccupancy < roomCapacity) {
+      return res.status(400).json({
+        error: `Your provisional room is not full yet (${currentOccupancy}/${roomCapacity}). Preferences can be submitted only when the provisional room is full.`,
+        currentOccupancy,
+        roomCapacity,
+      });
+    }
 
-      // Convert labels (e.g., "C-203") to desiredRoomId
-      // Ignore duplicates / invalid codes silently
-      let rank = 1;
-      for (const label of preferences) {
-        if (typeof label !== "string") continue;
-
-        const rows = await tx.$queryRaw<{ id: number }[]>`
-          SELECT id FROM Room WHERE roomNumber = ${label} LIMIT 1
-        `;
-        if (!rows.length) continue;
-
-        await tx.$executeRaw`
-          INSERT INTO RoomPreference (provisionalRoomId, rankNo, desiredRoomId)
-          VALUES (${room.id}, ${rank}, ${rows[0].id})
-        `;
-        rank += 1;
-      }
-      if (rank === 1) throw new Error("No valid rooms in preferences.");
-
-      return { ok: true, provisionalRoomId: room.id, count: rank - 1 };
+    const existing = await prisma.preference.findFirst({
+      where: { tempRoomId },
     });
 
-    return res.status(200).json(result);
-  } catch (e: any) {
-    console.error(e);
-    return res.status(400).json({ error: e?.message ?? "Failed" });
+    if (existing && existing.submittedBy !== studentId) {
+      return res.status(403).json({
+        error:
+          "Preferences already submitted for your provisional room by another member. Contact your group.",
+        submittedBy: existing.submittedBy,
+      });
+    }
+
+    const parsedCodes = clean.map((c) => {
+      const [blockShort, roomNumber] = c.split("-");
+      return {
+        blockShort: blockShort.trim(),
+        roomNumber: roomNumber.trim(),
+        code: c,
+      };
+    });
+
+    const roomMatches = await prisma.room.findMany({
+      where: {
+        roomNumber: { in: parsedCodes.map((p) => p.roomNumber) },
+        NOT: { block: { name: "Provisional" } },
+      },
+      include: { block: true },
+    });
+
+    const availableCodes = new Set(
+      roomMatches.map((r) => {
+        const bn = String(r.block?.name ?? "");
+        const short = (
+          bn.match(/[Bb]lock[\s\-]*([A-Za-z])$/)?.[1] ??
+          bn.match(/^([A-Za-z])$/)?.[1] ??
+          bn.match(/[A-Za-z]/)?.[0] ??
+          bn
+        ).toUpperCase();
+        return `${short}-${r.roomNumber}`.toUpperCase();
+      })
+    );
+
+    const invalid = clean.filter((c) => !availableCodes.has(c));
+    if (invalid.length > 0) {
+      return res
+        .status(400)
+        .json({
+          error: `Some room codes do not exist or are invalid: ${invalid.join(
+            ", "
+          )}`,
+        });
+    }
+
+    let saved;
+    if (existing) {
+      saved = await prisma.preference.update({
+        where: { id: existing.id },
+        data: { preferences: JSON.stringify(clean), submittedBy: studentId },
+      });
+    } else {
+      saved = await prisma.preference.create({
+        data: {
+          tempRoomId,
+          submittedBy: studentId,
+          preferences: JSON.stringify(clean),
+        },
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, count: clean.length, savedId: saved.id });
+  } catch (err) {
+    console.error("preferences POST error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 }

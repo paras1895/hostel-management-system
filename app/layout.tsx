@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Pick a safe SSR default; client script below will adjust instantly.
   const LIGHT = "corporate";
   const DARK = "night";
   const SSR_DEFAULT = DARK;
@@ -16,7 +15,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-theme={SSR_DEFAULT} suppressHydrationWarning>
       <head>
-        {/* Snap to saved/system theme BEFORE React hydrates */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

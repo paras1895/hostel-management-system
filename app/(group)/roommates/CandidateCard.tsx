@@ -18,7 +18,6 @@ export default function CandidateCard({ candidate }: { candidate: any }) {
 
         const data = await res.json().catch(() => ({}));
 
-        // Treat both "created" and "already existed" as success
         if (!res.ok || !data?.ok) {
           alert(data?.error || "Failed to send invite");
           return;

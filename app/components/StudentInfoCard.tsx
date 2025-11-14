@@ -18,7 +18,6 @@ function formatISTDate(value: string | number | Date) {
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "-";
-  // Stable across server/client:
   return new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Kolkata",
     day: "2-digit",

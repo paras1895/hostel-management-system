@@ -32,7 +32,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
   const [selectedDay, setSelectedDay] = useState<DayKey>(today.day);
   const menu = useMemo(() => WEEKLY_MENU[selectedDay], [selectedDay]);
 
-  // fetch simplified room card (accepted + pending) from API
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -59,14 +58,12 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header (Mobile Only) */}
       <header className="flex items-center justify-between p-4 bg-base-100 shadow-md md:hidden">
         <h1 className="text-xl font-semibold text-base-content">Dashboard</h1>
       </header>
 
       <main className="flex-1 overflow-x-hidden overflow-y-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 🧑 Student Info Card */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
@@ -103,7 +100,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             </div>
           </div>
 
-          {/* 🏠 Room Details (simplified) */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
@@ -112,7 +108,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             <div className="card-body relative">
               <h3 className="card-title">Room</h3>
 
-              {/* counter badge */}
               {student.room && (
                 <div className="badge badge-primary absolute top-4 right-4">
                   {acceptedCount}/{capacity}
@@ -133,7 +128,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
                     <strong>Capacity:</strong> {capacity}
                   </p>
 
-                  {/* Accepted roommates */}
                   <h4 className="mt-3 font-semibold">Roommates</h4>
                   {loadingCard ? (
                     <div className="opacity-60">Loading...</div>
@@ -154,7 +148,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
                     <div className="opacity-60">No roommates yet.</div>
                   )}
 
-                  {/* Pending invites */}
                   {pending.length > 0 && (
                     <>
                       <h4 className="mt-3 font-semibold">Pending Invites</h4>
@@ -186,7 +179,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             </div>
           </div>
 
-          {/* 🍽 Mess Details */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
@@ -195,7 +187,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             <div className="card-body">
               <h3 className="card-title">Mess Menu</h3>
 
-              {/* Day selector (optional) */}
               <div className="flex gap-2 flex-wrap text-sm mt-1">
                 {(
                   [
@@ -255,7 +246,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             </div>
           </div>
 
-          {/* 🧾 Complaints Section */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
@@ -307,7 +297,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             </div>
           </div>
 
-          {/* 💳 Payments */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
@@ -339,7 +328,6 @@ export default function StudentDashboard({ student }: StudentDashboardProps) {
             </div>
           </div>
 
-          {/* 👯 Roommates quick card (optional duplication removed) */}
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"

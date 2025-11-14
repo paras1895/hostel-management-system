@@ -9,7 +9,6 @@ export default async function WardenStudentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Unwrap params
   const { id } = await params;
 
   if (!id) {
@@ -76,7 +75,6 @@ export default async function WardenStudentDetailPage({
         </button>
       </form>
 
-      {/* Complaints List */}
       <div className="card bg-base-100 shadow p-6 space-y-3">
         <h3 className="text-xl font-semibold">Complaints</h3>
         {student.complaints.length ? (

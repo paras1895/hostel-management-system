@@ -6,9 +6,8 @@ import { useTransition } from "react";
 export default function InviteCard({ invite }: { invite: any }) {
   const [isPending, start] = useTransition();
 
-  // tolerate either nested (Prisma include) or flat (raw SQL) shapes
   const inviteId =
-    invite?.id ?? invite?.inviteId; // support either id or inviteId
+    invite?.id ?? invite?.inviteId;
   const fromName =
     invite?.fromStudent?.name ?? invite?.fromStudentName ?? "Unknown";
   const roomNumber =
